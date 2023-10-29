@@ -1,6 +1,7 @@
 #include "PlayMode.hpp"
 
 #include "LitColorTextureProgram.hpp"
+#include "UnlitPortalTextureProgram.hpp"
 
 #include "DrawLines.hpp"
 #include "Mesh.hpp"
@@ -14,9 +15,11 @@
 #include <random>
 
 GLuint phonebank_meshes_for_lit_color_texture_program = 0;
+GLuint portal_mesh_unlit_texture_program = 0;
 Load< MeshBuffer > phonebank_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer const *ret = new MeshBuffer(data_path("portal-test.pnct"));
 	phonebank_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
+	portal_mesh_unlit_texture_program = ret->make_vao_for_program(unlit_portal_texture_program->program);
 	return ret;
 });
 
@@ -27,7 +30,10 @@ Load< Scene > phonebank_scene(LoadTagDefault, []() -> Scene const * {
 		scene.drawables.emplace_back(transform);
 		Scene::Drawable &drawable = scene.drawables.back();
 
-		drawable.pipeline = lit_color_texture_program_pipeline;
+		if (mesh_name == "Portal1" || mesh_name == "Portal11")
+			drawable.pipeline = unlit_portal_texture_program_pipeline;
+		else
+			drawable.pipeline = lit_color_texture_program_pipeline;
 
 		drawable.pipeline.vao = phonebank_meshes_for_lit_color_texture_program;
 		drawable.pipeline.type = mesh.type;
